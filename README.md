@@ -6,8 +6,8 @@ A template for Agentic AI apps using LangChain (orchestration) + OpenRouter (LLM
 ## Pre-requisites
 
 - Git
-- Docker and Docker Compose
-- API keys for your chosen providers (OpenRouter, NVIDIA, Cerebras, etc.)
+- [Docker](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/)
+- API keys for your chosen OpenAI compatible endpoint provider e.g., OpenRouter, NVIDIA, Cerebras, Hugging Face etc.
 
 By default the project uses [OpenRouter](https://openrouter.ai) for LLM endpoints. The API key is accessible under your profile "Keys". Other OpenAI-compatible endpoints can also be used e.g., OpenAI, NVIDIA NIM, Cerebras, Hugging Face, so long as the model supports tool calling.
 
