@@ -1,0 +1,105 @@
+
+services:
+  # Mock Data API Service (assumes the databases are abstracted)
+  # For POC purposes can use mock data.
+  data-api:
+    build: ./data_api
+    ports:
+      - "9001:8000"
+    environment:
+      - PYTHONPATH=/app
+    volumes:
+      - ./data_api:/app
+    networks:
+      - llm-network
+
+  # Agent Backend Service
+  agent-backend:
+    # The main LLM will be incorporated here.
+    build: ./agent_backends/react_simple
+    restart: on-failure:3  # Restart up to 3 times on failure, all models in config must allow tool call.
+    ports:
+      - "9002:8000"
+    environment:
+    # Define your endpoint keys here. 
+    # The agent_backend/config.yaml configures the selectable list of
+    # model endpoints along with API key environment variables. 
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-dummy-key}
+    volumes:
+      - ./agent_backends/react_simple:/app
+    depends_on:
+      - data-api
+      - weather-mcp
+      - math-mcp
+      - data-tool-mcp
+    networks:
+      - llm-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # MCP Servers
+  weather-mcp:
+    build: ./mcp_servers/weather_server
+    ports:
+      - "9200:8080"
+    environment:
+      - PYTHONPATH=/app
+    networks:
+      - llm-network
+
+  math-mcp:
+    build: ./mcp_servers/math_server
+    ports:
+      - "9201:8080"
+    environment:
+      - PYTHONPATH=/app
+    networks:
+      - llm-network
+
+  data-tool-mcp:
+    build: ./mcp_servers/data_tool_server
+    ports:
+      - "9202:8080"
+    environment:
+      - PYTHONPATH=/app
+      - LOGFLAG={LOGFLAG:-"DEBUG"}
+    volumes:
+      # Enables hot reloading to iterate faster during development
+      - ./mcp_servers/data_tool_server/data_tool.py:/app/data_tool.py
+    depends_on:
+      - data-api
+    networks:
+      - llm-network
+
+  # Open WebUI Service
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    ports:
+      - "3000:8080"
+    environment:
+      - WEBUI_AUTH=False
+      - OPENAI_API_BASE_URL=http://agent-backend:8000/v1
+      - OPENAI_API_KEY=dummy-key
+      - ENABLE_OAUTH_SIGNUP=False
+      - ENABLE_SIGNUP=False
+      - DEFAULT_USER_ROLE=admin
+      - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY:-fallback-secret-key}
+    volumes:
+      - open_webui_data:/app/backend/data
+    depends_on:
+      - agent-backend
+    networks:
+      - llm-network
+    restart: unless-stopped
+
+networks:
+  llm-network:
+    driver: bridge
+
+volumes:
+  data_volume:
+  open_webui_data:

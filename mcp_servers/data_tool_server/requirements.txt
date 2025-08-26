@@ -1,0 +1,4 @@
+fastmcp==2.10.6
+httpx>=0.25.0
+uvicorn>=0.24.0
+plotly==6.3.0

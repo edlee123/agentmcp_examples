@@ -1,0 +1,38 @@
+supported_models:
+  openai/gpt-4:
+    provider: OpenAI
+    priority: high
+    base_url: https://openrouter.ai/api/v1
+    api_key_env: OPENROUTER_API_KEY
+  openai/gpt-4-turbo:
+    provider: OpenAI
+    priority: high
+    base_url: https://openrouter.ai/api/v1
+    api_key_env: OPENROUTER_API_KEY
+  openai/gpt-3.5-turbo:
+    provider: OpenAI
+    priority: medium
+    base_url: https://openrouter.ai/api/v1
+    api_key_env: OPENROUTER_API_KEY
+  anthropic/claude-3.5-sonnet:
+    provider: Anthropic
+    priority: high
+    base_url: https://openrouter.ai/api/v1
+    api_key_env: OPENROUTER_API_KEY
+  
+  # broken/invalid-model:
+  #   "provider": "Broken"
+  #   "priority": "low"
+  #   "base_url": "https://openrouter.ai/api/v1"
+  #   "secret_name": "openrouter_api_key"
+
+mcp_servers:
+  math:
+    url: http://math-mcp:8080/sse/
+    transport: sse
+  weather:
+    url: http://weather-mcp:8080/sse/
+    transport: sse
+  data_tool:
+    url: http://data-tool-mcp:8080/sse/
+    transport: sse
