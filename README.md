@@ -3,11 +3,15 @@
 
 A template for Agentic AI apps using LangChain (orchestration) + OpenRouter (LLMs) + FastMCP (MCP tools) + OpenWebUI (front end). The agent in this example is a LangChain ReAct agent.
 
-## 🏗️ Pre-requisites
+## Pre-requisites
 
-OpenAI-compatible API endpoint and API key (supports OpenAI, OpenRouter, and other compatible providers).
+- Git
+- Docker and Docker Compose
+- API keys for your chosen providers (OpenRouter, NVIDIA, Cerebras, etc.)
 
-## 🏗️ Architecture
+By default the project uses [OpenRouter](https://openrouter.ai) for LLM endpoints. The API key is accessible under your profile "Keys". Other OpenAI-compatible endpoints can also be used e.g., OpenAI, NVIDIA NIM, Cerebras, Hugging Face, so long as the model supports tool calling.
+
+## Project Structure
 
 ```
 agentmcp_examples/
@@ -21,104 +25,93 @@ agentmcp_examples/
     └── react_simple/            # Main agent backend (LLM + Langchain + MCP)
 ```
 
-## 🚀 Services
-
-### 1. Data API (Port 9001)
-- **Purpose**: Provides mock data for various use cases
-- **Technology**: FastAPI
-- **Endpoints**: `/users`, `/products`, `/documents`, `/search`
-
-### 2. Agent Backend: react_simple (Port 9002)
-- **Purpose**: Coordinates between LLM and MCP services
-- **Technology**: FastAPI + Langchain + OpenAI-compatible providers
-- **Location**: `agent_backends/react_simple/`
-- **Features**: Tool detection, LLM integration, health monitoring, streaming responses
-- **API Compatibility**: OpenAI-compatible endpoints for seamless integration
-
-### 3. Weather MCP Server (Port 9200)
-- **Purpose**: Handles weather-related queries
-- **Technology**: FastMCP
-- **Transport**: SSE (Server-Sent Events)
-
-### 4. Math MCP Server (Port 9201)
-- **Purpose**: Performs mathematical calculations
-- **Technology**: FastMCP
-- **Operations**: Addition, multiplication
-
-### 5. Data Tool MCP Server (Port 9202)
-- **Purpose**: Provides data analytics and insights
-- **Technology**: FastMCP
-- **Features**: User statistics, product analytics, document insights, data health checks
-- **Transport**: SSE (Server-Sent Events)
-
-### 6. OpenWebUI (Port 3000)
-- **Purpose**: Modern chat interface with advanced features
-- **Technology**: OpenWebUI (ChatGPT-like web interface)
-- **Features**: 
-  - Real-time streaming responses
-  - Code interpreter with Python execution
-  - Document upload and analysis
-  - Model selection and configuration
-  - Chat history and conversation management
-  - Markdown and code syntax highlighting
-
 ## 🛠️ Setup Instructions
 
-### Prerequisites
-- Docker and Docker Compose
-- API keys for your chosen providers (OpenRouter, NVIDIA, Cerebras, etc.)
 
 ### 1. Clone Repository
 ```bash
-cd agentmcp-examples
+git clone https://github.com/edlee123/agentmcp_examples.git
+cd agentmcp_examples
 ```
 
 ### 2. Add API Keys (REQUIRED)
 
-The default is using OPENROUTER_API_KEY.  To use other OpenAI compatible endpoints please refer to  [Customizing the LLM](#customizing-the-llm)
+The default is using OPENROUTER_API_KEY.  To use other OpenAI compatible endpoints please refer to [Customizing the LLM](#customizing-the-llm)
 
 ```bash
 # Set your API key as an environment variable
 export OPENROUTER_API_KEY="sk-or-v1-your-openrouter-key"
 ```
 
+This environment variable is passed into the agent-backend service (see `compose.react_simple.yaml`). Make sure this environment variable is set before the next step.
 
-
-This environment variable is passed into the agent-backend service (see `compose.react_simple.yaml`).
-
-To also add additional selectable endpoints, models, and keys, see the `agent_backends/react_simple/config.yaml` file.
-
-docker compose up -d 
 
 ### 3. Deploy App
 
 ```bash
 docker compose -f compose.react_simple.yaml up -d
+
+# To see the available services:
+docker ps -a 
 ```
 
-# Test agent backend health
-curl http://localhost:9002/health
+#### 🚀 Description of Services
 
-# Test OpenAI-compatible models endpoint (should show your configured model)
-curl http://localhost:9002/v1/models
+##### 1. Data API (Port 9001)
+- **Purpose**: Provides mock data for various use cases
+- **Technology**: FastAPI
+- **Endpoints**: `/users`, `/products`, `/documents`, `/search`
 
-# Expected response: {"object":"list","data":[{"id":"anthropic/claude-3.5-sonnet",...}]}
+##### 2. Agent Backend: react_simple (Port 9002)
+- **Purpose**: Coordinates between LLM and MCP services
+- **Technology**: FastAPI + Langchain + OpenAI-compatible providers
+- **Location**: `agent_backends/react_simple/`
+- **Features**: Tool detection, LLM integration, health monitoring, streaming responses
+- **API Compatibility**: OpenAI-compatible endpoints for seamless integration
 
-# Verify environment variables are set correctly
-echo "Model configured: $LLM_MODEL"
-echo "API base URL: $LLM_BASE_URL"  
-echo "API key configured: ${OPENAI_API_KEY:+YES}"
-```
+##### 3. Weather MCP Server (Port 9200)
+- **Purpose**: Handles weather-related queries
+- **Technology**: FastMCP
+- **Transport**: SSE (Server-Sent Events)
 
-### 5. Access Services
-- **OpenWebUI**: http://localhost:3000 (Main chat interface)
-- **Agent Backend (react_simple)**: http://localhost:9002
-- **Data API**: http://localhost:9001
-- **Weather MCP**: http://localhost:9200
-- **Math MCP**: http://localhost:9201
-- **Data Tool MCP**: http://localhost:9202
+##### 4. Math MCP Server (Port 9201)
+- **Purpose**: Performs mathematical calculations
+- **Technology**: FastMCP
+- **Operations**: Addition, multiplication
+
+##### 5. Data Tool MCP Server (Port 9202)
+- **Purpose**: Provides data analytics and insights
+- **Technology**: FastMCP
+- **Features**: User statistics, product analytics, document insights, data health checks
+- **Transport**: SSE (Server-Sent Events)
+
+##### 6. OpenWebUI (Port 3000)
+- **Purpose**: Modern chat interface with advanced features
+- **Technology**: OpenWebUI (ChatGPT-like web interface)
+- **Features**: 
+  - Real-time streaming responses
+  - Supports voice-to-text out of the box.
+  - Multiple models configuration
+  - Authorization + user management.
+  - Chat history.
+  - Automatic rendering of markdown or html artifacts.
+  - Code interpreter with Python execution
+  - Document or image upload
+  - Chat history and conversation management
+  - Markdown and code syntax highlighting
 
 ## 🧪 Testing the System
+
+Test agent backend health:
+curl http://localhost:9002/health
+
+Show list of configured models (selectable in the UI):
+curl http://localhost:9002/v1/models
+
+Expected response: 
+```bash
+{"object":"list","data":[{"id":"anthropic/claude-3.5-sonnet",...}]}
+```
 
 ### Via OpenWebUI (Recommended)
 1. Open http://localhost:3000
@@ -130,14 +123,16 @@ echo "API key configured: ${OPENAI_API_KEY:+YES}"
    - "Tell me about the users in the system"
    - "What products do we have?"
    - "Show me document statistics"
-   - "Create a bar chart showing product sales data" (uses code interpreter)
+   - "Create a bar chart showing product sales data" (uses OpenWebUI artifacts to render HTML)
 
 ### Via API (OpenAI-Compatible)
 ```bash
+export LLM_MODEL="openai/gpt-4"
+
 # Test streaming chat completions with your configured model
 curl -X POST http://localhost:9002/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $OPENAI_API_KEY" \
+  -H "Authorization: Bearer $OPENROUTER_API_KEY" \
   -d "{
     \"model\": \"$LLM_MODEL\",
     \"messages\": [{\"role\": \"user\", \"content\": \"What is 15 + 27?\"}],
@@ -147,7 +142,7 @@ curl -X POST http://localhost:9002/v1/chat/completions \
 # Test non-streaming responses  
 curl -X POST http://localhost:9002/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $OPENAI_API_KEY" \
+  -H "Authorization: Bearer $OPENROUTER_API_KEY" \
   -d "{
     \"model\": \"$LLM_MODEL\", 
     \"messages\": [{\"role\": \"user\", \"content\": \"What is the weather in New York?\"}],
@@ -181,10 +176,9 @@ curl http://localhost:9001/search?q=technology
 
 ### Adding New MCP Servers
 1. Create new directory in `mcp_servers/`
-2. Add Dockerfile and requirements.txt
+2. Add server Dockerfile and requirements.txt
 3. Implement MCP server using FastMCP
-4. Update `compose.react_simple.yaml` to include new service
-5. Modify `agent_backends/react_simple/main.py` to integrate new tools
+4. Update compose file e.g., `compose.react_simple.yaml` to include new service
 
 #### Example: Data Tool MCP Server
 The Data Tool MCP Server provides a template for creating new MCP servers that interact with data APIs:
@@ -239,7 +233,6 @@ async def my_tool(query_type: str) -> ToolResult:
 
 ### Customizing the LLM
 
-
 To add or change LLMs available to the system, update the `agent_backends/react_simple/config.yaml` file. Each entry in the `models` section defines a model, its provider, and the environment variable used for its API key. For example:
 
 ```yaml
@@ -252,22 +245,17 @@ models:
     api_key_env: "OPENAI_API_KEY"
 ```
 
-
-For each model you add, ensure the corresponding API key environment variable is set in your shell, and the `compose.yaml` under the `environment:` section for the `agent-backend` service:
+For each model you add, ensure the corresponding API key environment variable is set in your shell, and your compose file e.g. `compose.react_simple.yaml` in  the `environment:` section for the `agent-backend` service:
 
 ```yaml
 services:
   agent-backend:
     environment:
       - OPENROUTER_API_KEY=sk-or-v1-your-openrouter-key
-
       - OPENAI_API_KEY=sk-your-openai-key
 ```
 
 **Important:** All models listed in `config.yaml` must support tool calling (function calling) for the system to work correctly. If a model does not support tool calls, it will not be able to use the MCP tools and may cause errors.
-
-
-docker compose restart agent-backend
 
 After updating `config.yaml` and environment variables, restart the agent-backend service:
 
@@ -275,10 +263,7 @@ After updating `config.yaml` and environment variables, restart the agent-backen
 docker compose -f compose.react_simple.yaml restart agent-backend
 ```
 
-You can now select the newly available models in OpenWebUI or via the API.
-
-
-## 🧠 LLM Tool Integration
+You can now select the newly available models in OpenWebUI.
 
 
 ## 📊 Validation
@@ -310,18 +295,18 @@ docker compose -f compose.react_simple.yaml logs agent-backend
 
 This template is designed for prototyping Agent apps. Feel free to:
 - Add new MCP servers and tools
-- Enhance the UI
-- Add new data apis
-- Implement additional LLM providers
+- Add mock data apis to create new use cases. 
+- Add new agent back ends
+- Add additional LLM providers
+- Customize the look and feel of OpenWebUI.
 
 ## 🐛 Troubleshooting
 
 ### Common Issues
 
 **Services not starting:**
-docker compose down
-docker compose build --no-cache
-docker compose up -d
+
+
 ```bash
 docker compose -f compose.react_simple.yaml down
 docker compose -f compose.react_simple.yaml build --no-cache
