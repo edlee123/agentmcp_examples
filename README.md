@@ -252,10 +252,11 @@ models:
     api_key_env: "OPENAI_API_KEY"
 ```
 
-For each model you add, ensure the corresponding API key environment variable is set in your shell, and your compose file e.g. `compose.react_simple.yaml` in  the `environment:` section for the `agent-backend` service:
+For each model you add, add corresponding API key environment variable to the compose file e.g. `compose.react_simple.yaml` in  the `environment:` section for the `agent-backend` service:
 
 ```yaml
 services:
+  ...
   agent-backend:
     environment:
       - OPENROUTER_API_KEY=sk-or-v1-your-openrouter-key
