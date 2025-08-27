@@ -9,9 +9,9 @@ Deployable Agentic AI examples using LangChain (orchestration) + OpenRouter (LLM
 - [Docker](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/)
 - API keys for your chosen OpenAI compatible endpoint provider e.g., OpenRouter, Cerebras, NVIDIA, Hugging Face etc.
 
-By default the project uses [OpenRouter](https://openrouter.ai) for LLM endpoints so you will need to sign up for an account. The API key is accessible under your profile "Keys". 
+By default the project uses [OpenRouter.ai](https://openrouter.ai) with access to hundreds of LLM endpoints. You will need to sign up for an account, and API key is accessible under your profile "Keys". 
 
-Other OpenAI-compatible endpoints can also be used e.g., Cerebras, Hugging Face, OpenAI, NVIDIA NIM, so long as the model supports tool calling.
+Other OpenAI-compatible endpoints can also be used e.g., Cerebras, Hugging Face, OpenAI, NVIDIA NIM, so long as the chosen model supports tool calling.
 
 ## Project Structure
 
@@ -56,6 +56,8 @@ docker compose -f compose.react_simple.yaml up -d
 # To see the available services:
 docker ps -a 
 ```
+
+Navigate to https://localhost:3000 to see the UI.
 
 #### 🚀 Description of Services
 
