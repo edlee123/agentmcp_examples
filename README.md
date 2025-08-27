@@ -1,15 +1,17 @@
 
 # AgentMCP Examples
 
-A template for Agentic AI apps using LangChain (orchestration) + OpenRouter (LLMs) + FastMCP (MCP tools) + OpenWebUI (front end). The agent in this example is a LangChain ReAct agent.
+Deployable Agentic AI examples using LangChain (orchestration) + OpenRouter (LLMs) + FastMCP (MCP tools) + OpenWebUI (front end) stack.
 
 ## Pre-requisites
 
 - Git
 - [Docker](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/)
-- API keys for your chosen OpenAI compatible endpoint provider e.g., OpenRouter, NVIDIA, Cerebras, Hugging Face etc.
+- API keys for your chosen OpenAI compatible endpoint provider e.g., OpenRouter, Cerebras, NVIDIA, Hugging Face etc.
 
-By default the project uses [OpenRouter](https://openrouter.ai) for LLM endpoints. The API key is accessible under your profile "Keys". Other OpenAI-compatible endpoints can also be used e.g., OpenAI, NVIDIA NIM, Cerebras, Hugging Face, so long as the model supports tool calling.
+By default the project uses [OpenRouter](https://openrouter.ai) for LLM endpoints so you will need to sign up for an account. The API key is accessible under your profile "Keys". 
+
+Other OpenAI-compatible endpoints can also be used e.g., Cerebras, Hugging Face, OpenAI, NVIDIA NIM, so long as the model supports tool calling.
 
 ## Project Structure
 
@@ -91,7 +93,7 @@ docker ps -a
 - **Features**: 
   - Real-time streaming responses
   - Supports voice-to-text out of the box.
-  - Multiple models configuration
+  - Multi-endpoints model selection.
   - Authorization + user management.
   - Chat history.
   - Automatic rendering of markdown or html artifacts.
@@ -103,10 +105,15 @@ docker ps -a
 ## 🧪 Testing the System
 
 Test agent backend health:
+```bash
 curl http://localhost:9002/health
+```
+
 
 Show list of configured models (selectable in the UI):
+```bash
 curl http://localhost:9002/v1/models
+```
 
 Expected response: 
 ```bash
@@ -127,7 +134,7 @@ Expected response:
 
 ### Via API (OpenAI-Compatible)
 ```bash
-export LLM_MODEL="openai/gpt-4"
+export LLM_MODEL="anthropic/claude-3.5-sonnet"
 
 # Test streaming chat completions with your configured model
 curl -X POST http://localhost:9002/v1/chat/completions \
@@ -181,14 +188,14 @@ curl http://localhost:9001/search?q=technology
 4. Update compose file e.g., `compose.react_simple.yaml` to include new service
 
 #### Example: Data Tool MCP Server
-The Data Tool MCP Server provides a template for creating new MCP servers that interact with data APIs:
+The Data Tool MCP Server `mcp_servers/data_tool_server/data_tool.py` provides a template for creating new MCP servers:
 
 ```python
 # Initialize FastMCP server
 mcp = FastMCP("Data Tool Server", host="0.0.0.0", port=8080)
 
-# Define a helper function for API calls
-async def call_external_api(endpoint: str, params: Optional[Dict] = None) -> Dict[str, Any]:
+# Define a helper function for data API calls
+async def call_data_api(endpoint: str, params: Optional[Dict] = None) -> Dict[str, Any]:
     try:
         async with httpx.AsyncClient() as client:
             url = f"{API_BASE_URL}{endpoint}"
@@ -213,7 +220,7 @@ async def my_tool(query_type: str) -> ToolResult:
     """
     try:
         # Call external API
-        data = await call_external_api("/endpoint")
+        data = await call_data_api("/endpoint")
         
         # Process data
         result = process_data(data)
